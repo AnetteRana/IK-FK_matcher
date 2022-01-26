@@ -1,0 +1,66 @@
+
+//// Based on this video:
+//// https://www.youtube.com/watch?v=7R_0omGY-Ms
+
+/////// Variables
+$FK_to_IK = false;
+string $r_Arm_ShoulderFKCtrl = "Mr_Buttons:Mr_Buttons_r_Arm_ShoulderFKCtrl";
+string $r_elbow_position = "r_elbow_position";
+
+if ($FK_to_IK)  // FK -> IK (Fiks FK)
+    {
+    // select fk and ik shoulder, and match
+    select -r $r_Arm_ShoulderFKCtrl ;
+    select -tgl Mr_Buttons:Mr_Buttons_r_Arm_ShoulderJntIK ;
+    MatchTransform;
+    performMatchTransform 0;
+
+    // select fk and ik elbow/radius, and match
+    select -r Mr_Buttons:Mr_Buttons_r_Arm_ElbowFKCtrl ;
+    select -tgl Mr_Buttons:Mr_Buttons_r_Arm_ElbowJntIK ;
+    MatchTransform;
+    performMatchTransform 0;
+
+    // select fk and ik wrist, and match
+    select -r Mr_Buttons:Mr_Buttons_r_Arm_WristFKCtrl ;
+    select -tgl Mr_Buttons:Mr_Buttons_r_Arm_WristJntIK ;
+    MatchTransform;
+    performMatchTransform 0;
+    }
+else            // IK -> FK (Fiks IK)
+{
+    //// check if $r_elbow_position exists under Mr_Buttons_r_Arm_ElbowFKCtrl
+    if( `objExists $r_elbow_position` != true) // create $r_elbow_position
+    {
+        // first make a locator and match it's location to that of the elbow control
+        CreateLocator;
+        rename $r_elbow_position;
+        select -tgl Mr_Buttons:Mr_Buttons_r_Arm_ElbowIKCtrl ;
+        MatchTransform;
+        performMatchTransform 0;
+
+        // it needs to move with FK arm, so parent it to: left FK elbow joint (control arm, not skeleton)
+        select -r $r_elbow_position ;
+        select -add Mr_Buttons:Mr_Buttons_r_Arm_ElbowFKCtrl ;
+        Parent;
+        $r_elbow_position = "Mr_Buttons:r_elbow_position";
+    } 
+
+    // select IK_wrist control, then l_wrist_fk, then match transforms
+    select -r Mr_Buttons:Mr_Buttons_r_Arm_WristIKCtrl ;
+    select -tgl Mr_Buttons:Mr_Buttons_r_Arm_WristFKCtrl ;
+    MatchTransform;
+
+    // select elbow control(IK), then locator(FK), then match transforms
+    select -r Mr_Buttons:Mr_Buttons_r_Arm_ElbowIKCtrl ;
+    select -tgl $r_elbow_position ;
+    MatchTransform;
+}
+
+
+
+
+
+
+
+
